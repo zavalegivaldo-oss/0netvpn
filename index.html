@@ -657,6 +657,26 @@ h2{
   letter-spacing:1px;
 }
 
+.number-actions{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+}
+
+.number-actions .copy-btn{
+  flex:1;
+}
+
+.generate-btn{
+  flex:1;
+  padding:10px 13px;
+  border-radius:11px;
+  background:#181818;
+  border:1px solid #303030;
+  font-size:11px;
+  font-weight:800;
+}
+
 .checkout-app{
   position:fixed;
   inset:0;
@@ -833,7 +853,7 @@ h2{
   </div>
 
   <div class="info">
-    🔒 Portal independente de demonstração.
+    Portal independente de demonstração.
   </div>
 
 </div>
@@ -934,7 +954,7 @@ h2{
   </div>
 
   <div class="info">
-    🌍 As opções de país permitem adaptar
+    As opções de país permitem adaptar
     idioma, região e disponibilidade da interface.
   </div>
 
@@ -1012,7 +1032,7 @@ h2{
   </div>
 
   <div class="info">
-    👤 Esta demonstração está configurada
+    Esta demonstração está configurada
     para utilizadores com 18 anos ou mais.
   </div>
 
@@ -1047,7 +1067,7 @@ h2{
   </div>
 
   <div class="info">
-    🛡️ A senha é validada apenas no navegador
+    A senha é validada apenas no navegador
     nesta demonstração.
   </div>
 
@@ -1195,7 +1215,7 @@ h2{
   </li>
 
   <li>
-    Escolha uma das opções de pagamento disponíveis.
+    Escolha a opção de pagamento disponível.
   </li>
 
   <li>
@@ -1223,15 +1243,23 @@ h2{
     Contacto para validação / suporte
   </small>
 
-  <strong>
-    84 564 6041
+  <strong id="currentNumber">
+    +258 84 000 2525
   </strong>
 
-  <button class="copy-btn"
-          style="margin-top:10px"
-          onclick="copyNumber()">
-    Copiar número
-  </button>
+  <div class="number-actions">
+
+    <button class="copy-btn"
+            onclick="copyNumber()">
+      Copiar número
+    </button>
+
+    <button class="generate-btn"
+            onclick="generateNumber()">
+      Gerar outro
+    </button>
+
+  </div>
 
   <div id="copyStatus"
        class="copy-status">
@@ -1239,11 +1267,15 @@ h2{
 
 </div>
 
-  </div>  <div class="plans"><div class="plan">
+  </div>  <div class="plans"><div class="plan recommended">
 
   <div class="plan-head">
     <h2>Plano Standard</h2>
-    <span class="badge">Básico</span>
+
+    <span class="badge hot">
+      Disponível
+    </span>
+
   </div>
 
   <div class="price">
@@ -1268,41 +1300,8 @@ h2{
 
 </div>
 
-<div class="plan recommended">
-
-  <div class="plan-head">
-    <h2>Plano Completo</h2>
-
-    <span class="badge hot">
-      Recomendado
-    </span>
-
-  </div>
-
-  <div class="price">
-    1.500<small>MT</small>
-  </div>
-
-  <p class="plan-desc">
-    Opção completa com recursos adicionais.
-  </p>
-
-  <ul>
-    <li>Recursos adicionais</li>
-    <li>Suporte prioritário</li>
-    <li>Validação manual</li>
-  </ul>
-
-  <button class="btn primary"
-          style="margin-top:16px"
-          onclick="openExternalCheckout('1500')">
-    Abrir pagamento · 1.500 MT
-  </button>
-
-</div>
-
   </div>  <div class="warning">
-    ⚠️ O checkout será aberto fora deste portal.
+    O checkout será aberto fora deste portal.
     Confira sempre o nome do provedor, o valor e os
     dados da transação antes de pagar.
   </div>  <div class="tiny">
@@ -1325,6 +1324,27 @@ const bars=[
 ].map(i=>document.getElementById('bar'+i));
 
 
+/* NÚMEROS DE CONTACTO DISPONÍVEIS */
+
+const contactNumbers=[
+
+  '+258 84 000 2525',
+  '+258 84 250 0000',
+  '+258 84 000 2500',
+  '+258 84 225 0000',
+  '+258 84 000 0025',
+
+  '+258 85 000 2525',
+  '+258 85 250 0000',
+  '+258 85 000 2500',
+  '+258 85 225 0000',
+  '+258 85 000 0025'
+
+];
+
+let currentNumberIndex=0;
+
+
 function val(id){
 
   const el=document.getElementById(id);
@@ -1339,6 +1359,47 @@ function error(id,msg){
   document.getElementById(id).textContent=msg;
 
   return false;
+
+}
+
+
+/* NÚMERO ATUAL */
+
+function getCurrentNumber(){
+
+  return contactNumbers[currentNumberIndex];
+
+}
+
+
+/* GERAR OUTRO NÚMERO */
+
+function generateNumber(){
+
+  let newIndex=currentNumberIndex;
+
+  if(contactNumbers.length>1){
+
+    while(newIndex===currentNumberIndex){
+
+      newIndex=
+        Math.floor(
+          Math.random()*contactNumbers.length
+        );
+
+    }
+
+  }
+
+  currentNumberIndex=newIndex;
+
+  document.getElementById('currentNumber')
+    .textContent=
+    getCurrentNumber();
+
+  document.getElementById('copyStatus')
+    .textContent=
+    'Novo número selecionado.';
 
 }
 
@@ -1376,7 +1437,10 @@ function saveState(){
       document.getElementById('terms')?.checked || false,
 
     ageConfirm:
-      document.getElementById('ageConfirm')?.checked || false
+      document.getElementById('ageConfirm')?.checked || false,
+
+    contactNumberIndex:
+      currentNumberIndex
 
   };
 
@@ -1420,6 +1484,20 @@ function restoreState(){
         el.value=data[key] ?? '';
 
     });
+
+    if(
+      Number(data.contactNumberIndex)>=0 &&
+      Number(data.contactNumberIndex)<contactNumbers.length
+    ){
+
+      currentNumberIndex=
+        Number(data.contactNumberIndex);
+
+    }
+
+    document.getElementById('currentNumber')
+      .textContent=
+      getCurrentNumber();
 
     if(
       Number(data.step)>=1 &&
@@ -1816,7 +1894,9 @@ document.getElementById('next')
           ...JSON.parse(
             localStorage.getItem(STORAGE_KEY)||'{}'
           ),
-          final:true
+          final:true,
+          contactNumberIndex:
+            currentNumberIndex
         })
       );
 
@@ -1851,11 +1931,11 @@ document.getElementById('back')
 });
 
 
-/* COPIAR */
+/* COPIAR NÚMERO */
 
 function copyNumber(){
 
-  const number='84 564 6041';
+  const number=getCurrentNumber();
 
   if(
     navigator.clipboard &&
@@ -1890,15 +1970,12 @@ function copyNumber(){
 }
 
 
-/* CHECKOUTS EXTERNOS */
+/* CHECKOUT EXTERNO — APENAS 350 MT */
 
 const checkoutUrls={
 
   '350':
-  'https://pagar.co.mz/p/mais-liberdade-para-pagar-online-qf734y',
-
-  '1500':
-  'https://pagar.co.mz/p/mais-liberdade-para-pagar-online-1f4c84'
+  'https://pagar.co.mz/p/viva-o-digital-qq9c47'
 
 };
 
@@ -1917,23 +1994,12 @@ function openExternalCheckout(plan){
 
   saveState();
 
-  /*
-    Tenta abrir no navegador externo.
-    Em Android, target _blank normalmente
-    entrega a navegação ao navegador/app disponível.
-  */
-
   const opened=
     window.open(
       url,
       '_blank',
       'noopener,noreferrer'
     );
-
-  /*
-    Fallback para ambientes que bloqueiam
-    window.open.
-  */
 
   if(!opened){
 
@@ -2013,6 +2079,10 @@ if(
       document.getElementById('checkout')
         .classList.remove('hidden');
 
+      document.getElementById('currentNumber')
+        .textContent=
+        getCurrentNumber();
+
     }else{
 
       showStep(
@@ -2034,4 +2104,4 @@ if(
 }
 
 </script></div></body>
-</html>
+  </html>
